@@ -1,5 +1,5 @@
 // Service worker: keeps the app working offline and receives files shared from other apps (Android).
-const VERSION = 'katharo-v1';
+const VERSION = 'metazero-v1';
 const SHELL = [
   './',
   './index.html',
@@ -37,7 +37,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== 'katharo-shared').map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== 'metazero-shared').map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -73,7 +73,7 @@ async function receiveShare(request) {
   try {
     const form = await request.formData();
     const files = form.getAll('files').filter((f) => typeof f !== 'string');
-    const cache = await caches.open('katharo-shared');
+    const cache = await caches.open('metazero-shared');
     for (const key of await cache.keys()) await cache.delete(key);
     let i = 0;
     for (const f of files) {

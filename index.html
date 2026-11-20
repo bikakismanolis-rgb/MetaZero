@@ -3,7 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Καθαρό</title>
+  <!-- The page may only talk to its own origin: files cannot be sent anywhere, even by mistake. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; script-src 'self'; style-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>MetaZero</title>
   <meta name="description" content="Αφαιρεί τα κρυφά στοιχεία (τοποθεσία, συσκευή, ονόματα, ημερομηνίες) από φωτογραφίες, βίντεο και έγγραφα πριν τα μοιραστείς. Όλα γίνονται στη συσκευή σου.">
   <meta name="theme-color" content="#f4f5f1" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
@@ -12,15 +14,15 @@
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Καθαρό">
+  <meta name="apple-mobile-web-app-title" content="MetaZero">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="top">
     <div class="wrap top-inner">
-      <a class="brand" href="./" aria-label="Καθαρό, αρχική">
+      <a class="brand" href="./" aria-label="MetaZero, αρχική">
         <img src="icons/icon.svg" alt="" width="32" height="32">
-        <span>Καθαρό</span>
+        <span>MetaZero</span>
       </a>
       <span class="offline-pill" id="offline-pill" hidden>Χωρίς internet, λειτουργεί κανονικά</span>
     </div>
@@ -29,7 +31,7 @@
   <main class="wrap">
     <section class="intro" id="intro">
       <h1>Στείλε αρχεία χωρίς κρυφά στοιχεία</h1>
-      <p class="lead">Οι φωτογραφίες, τα βίντεο και τα έγγραφα κουβαλάνε πληροφορίες που δεν φαίνονται: πού τραβήχτηκαν, με ποιο κινητό, ποιος τα έγραψε και πότε. Το Καθαρό τις σβήνει πριν τα μοιραστείς.</p>
+      <p class="lead">Οι φωτογραφίες, τα βίντεο και τα έγγραφα κουβαλάνε πληροφορίες που δεν φαίνονται: πού τραβήχτηκαν, με ποιο κινητό, ποιος τα έγραψε και πότε. Το MetaZero τις σβήνει πριν τα μοιραστείς.</p>
     </section>
 
     <section class="drop" id="drop" aria-label="Επιλογή αρχείων">
@@ -115,7 +117,7 @@
   </main>
 
   <footer class="wrap foot">
-    <p>Καθαρό · έκδοση 0.1</p>
+    <p>MetaZero · έκδοση 0.1</p>
   </footer>
 
   <div class="bulk" id="bulk" hidden>
@@ -135,7 +137,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="sr-only" id="live" aria-live="polite"></div>
 
-  <noscript><p class="wrap">Το Καθαρό χρειάζεται JavaScript για να δουλέψει.</p></noscript>
+  <noscript><p class="wrap">Το MetaZero χρειάζεται JavaScript για να δουλέψει.</p></noscript>
   <script type="module" src="app.js"></script>
 </body>
 </html>

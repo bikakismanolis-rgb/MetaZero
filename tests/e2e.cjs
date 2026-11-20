@@ -102,6 +102,8 @@ fs.mkdirSync(SHOTS, { recursive: true });
   check(badges.includes('setup.exe:Δεν υποστηρίζεται') && badges.includes('notes.txt:Καθαρό'), `unsupported and text files handled (${badges.join(', ')})`);
   const unsupportedButtons = await dp.$$eval('.card', (cs) => cs.filter((c) => c.querySelector('.badge-warn')).reduce((n, c) => n + c.querySelectorAll('[data-action]').length, 0));
   check(unsupportedButtons === 0, 'no save/share button on unsupported files');
+  const blocked = await dp.evaluate(() => fetch('https://example.com/').then(() => false, () => true));
+  check(blocked, 'Content-Security-Policy blocks requests to any other server');
   await dp.screenshot({ path: `${SHOTS}/5-desktop-results.png`, fullPage: true });
   await desk.close();
 

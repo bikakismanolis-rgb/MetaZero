@@ -45,7 +45,7 @@ const store = {
   },
 };
 
-const state = { items: [], renameMode: store.get('katharo.rename', 'auto') };
+const state = { items: [], renameMode: store.get('metazero.rename', 'auto') };
 let queue = Promise.resolve();
 
 // ---------- adding files ----------
@@ -283,7 +283,7 @@ for (const r of document.querySelectorAll('input[name="rename"]')) {
   r.checked = r.value === state.renameMode;
   r.addEventListener('change', () => {
     state.renameMode = r.value;
-    store.set('katharo.rename', r.value);
+    store.set('metazero.rename', r.value);
   });
 }
 
@@ -334,7 +334,7 @@ if (!standalone) {
     $('#install').hidden = false;
     $('#install-btn').hidden = false;
     if (/android/i.test(navigator.userAgent)) {
-      $('#install-text').textContent = 'Μετά την εγκατάσταση θα εμφανίζεται στο μενού «Κοινοποίηση»: στέλνεις ένα αρχείο στο Καθαρό και το παίρνεις πίσω καθαρό.';
+      $('#install-text').textContent = 'Μετά την εγκατάσταση θα εμφανίζεται στο μενού «Κοινοποίηση»: στέλνεις ένα αρχείο στο MetaZero και το παίρνεις πίσω καθαρό.';
     }
   });
 }
@@ -353,7 +353,7 @@ async function takeSharedFiles() {
   history.replaceState(null, '', location.pathname);
   if (!('caches' in window)) return;
   try {
-    const cache = await caches.open('katharo-shared');
+    const cache = await caches.open('metazero-shared');
     const files = [];
     for (const req of await cache.keys()) {
       const res = await cache.match(req);
