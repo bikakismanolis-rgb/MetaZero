@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Καθαρό</title>
+  <meta name="description" content="Αφαιρεί τα κρυφά στοιχεία (τοποθεσία, συσκευή, ονόματα, ημερομηνίες) από φωτογραφίες, βίντεο και έγγραφα πριν τα μοιραστείς. Όλα γίνονται στη συσκευή σου.">
+  <meta name="theme-color" content="#f4f5f1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Καθαρό">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="./" aria-label="Καθαρό, αρχική">
+        <img src="icons/icon.svg" alt="" width="32" height="32">
+        <span>Καθαρό</span>
+      </a>
+      <span class="offline-pill" id="offline-pill" hidden>Χωρίς internet, λειτουργεί κανονικά</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="intro" id="intro">
+      <h1>Στείλε αρχεία χωρίς κρυφά στοιχεία</h1>
+      <p class="lead">Οι φωτογραφίες, τα βίντεο και τα έγγραφα κουβαλάνε πληροφορίες που δεν φαίνονται: πού τραβήχτηκαν, με ποιο κινητό, ποιος τα έγραψε και πότε. Το Καθαρό τις σβήνει πριν τα μοιραστείς.</p>
+    </section>
+
+    <section class="drop" id="drop" aria-label="Επιλογή αρχείων">
+      <input type="file" id="picker" multiple hidden>
+      <button class="btn btn-primary btn-big" id="pick" type="button">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="pick-label">Διάλεξε αρχεία</span>
+      </button>
+      <p class="drop-hint">ή σύρε τα εδώ</p>
+      <p class="privacy">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Τα αρχεία μένουν στη συσκευή σου. Δεν ανεβαίνουν πουθενά.
+      </p>
+      <ul class="kinds" aria-label="Υποστηριζόμενα αρχεία">
+        <li>Φωτογραφίες</li><li>Βίντεο</li><li>Ήχος</li><li>PDF</li><li>Word</li><li>Excel</li><li>PowerPoint</li>
+      </ul>
+    </section>
+
+    <section class="results" id="results" aria-label="Αποτελέσματα" hidden>
+      <div class="results-head">
+        <h2 id="results-title">Τα αρχεία σου</h2>
+        <button class="btn btn-ghost btn-sm" id="clear" type="button">Καθαρισμός λίστας</button>
+      </div>
+      <ul class="cards" id="cards"></ul>
+    </section>
+
+    <details class="settings" id="settings">
+      <summary>
+        <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M1 14h6"/><path d="M9 8h6"/><path d="M17 16h6"/></svg>
+        Ρυθμίσεις ονόματος αρχείου
+      </summary>
+      <p class="settings-help">Και το όνομα μπορεί να προδώσει πράγματα. Το <code>IMG_20261120_143205.jpg</code> λέει ακριβώς πότε τραβήχτηκε η φωτογραφία.</p>
+      <fieldset>
+        <legend class="sr-only">Όνομα αρχείου</legend>
+        <label class="radio"><input type="radio" name="rename" value="auto" checked>
+          <span><strong>Αυτόματα</strong><br><small>Αλλάζει μόνο ονόματα που δείχνουν ημερομηνία ή συσκευή</small></span></label>
+        <label class="radio"><input type="radio" name="rename" value="keep">
+          <span><strong>Κράτα το αρχικό όνομα</strong></span></label>
+        <label class="radio"><input type="radio" name="rename" value="random">
+          <span><strong>Τυχαίο όνομα σε όλα</strong><br><small>π.χ. photo-k3m9.jpg</small></span></label>
+      </fieldset>
+    </details>
+
+    <section class="install" id="install" hidden>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      <div>
+        <h2>Βάλ' το στην αρχική οθόνη</h2>
+        <p id="install-text">Θα ανοίγει σαν εφαρμογή και θα δουλεύει χωρίς internet.</p>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="install-btn" type="button" hidden>Εγκατάσταση</button>
+    </section>
+
+    <section class="faq" aria-label="Ερωτήσεις">
+      <details>
+        <summary>Τι ακριβώς αφαιρεί;</summary>
+        <ul>
+          <li>Την <strong>τοποθεσία GPS</strong> όπου τραβήχτηκε μια φωτογραφία ή ένα βίντεο</li>
+          <li>Το <strong>μοντέλο και τον σειριακό αριθμό</strong> του κινητού ή της κάμερας</li>
+          <li><strong>Ημερομηνίες</strong> λήψης, δημιουργίας και αλλαγής</li>
+          <li>Το <strong>όνομα</strong> του δημιουργού, της εταιρείας και όσων άφησαν σχόλια ή αλλαγές</li>
+          <li><strong>Διαδρομές</strong> από τον υπολογιστή σου (συχνά περιέχουν το όνομα χρήστη σου)</li>
+          <li>Κρυφές <strong>μικρογραφίες</strong>, το όνομα του <strong>εκτυπωτή</strong>, κωδικούς εγγράφου, ιστορικό επεξεργασίας</li>
+          <li>Τα ίδια στοιχεία από <strong>φωτογραφίες μέσα σε PDF και Word</strong></li>
+        </ul>
+      </details>
+      <details>
+        <summary>Τι δεν αλλάζει;</summary>
+        <p><strong>Ό,τι φαίνεται.</strong> Πρόσωπα, πινακίδες, το κείμενο του εγγράφου, το κείμενο των σχολίων. Αν κάτι υπάρχει μέσα στο ίδιο το περιεχόμενο, η εφαρμογή σε προειδοποιεί όπου μπορεί (π.χ. σημειώσεις ομιλητή, κρυφά φύλλα Excel, παρακολούθηση αλλαγών).</p>
+        <p><strong>Η ποιότητα.</strong> Οι φωτογραφίες και τα βίντεο δεν ξανασυμπιέζονται. Βγαίνουν ίδια, pixel προς pixel.</p>
+        <p><strong>Το τυπικό προφίλ χρωμάτων</strong> (π.χ. sRGB ή Display P3) μένει, γιατί χωρίς αυτό αλλάζουν τα χρώματα. Το πολύ να φαίνεται η εταιρεία που το έφτιαξε (π.χ. Apple). Τα προσωπικά προφίλ, όπως αυτά από βαθμονόμηση οθόνης, αφαιρούνται.</p>
+      </details>
+      <details>
+        <summary>Ποια αρχεία υποστηρίζει;</summary>
+        <dl class="formats" id="formats"></dl>
+        <p class="muted">Τα παλιά .doc, .xls και .ppt δεν υποστηρίζονται. Αποθήκευσέ τα πρώτα ως .docx, .xlsx ή .pptx.</p>
+      </details>
+      <details>
+        <summary>Είναι ασφαλές;</summary>
+        <p>Όλη η δουλειά γίνεται μέσα στον browser της συσκευής σου. Δεν υπάρχει server που να βλέπει τα αρχεία σου, ούτε λογαριασμός. Μετά την πρώτη φόρτωση δουλεύει και χωρίς internet.</p>
+        <p>Κάθε αρχείο ελέγχεται και δεύτερη φορά μετά τον καθαρισμό, για να βεβαιωθούμε ότι δεν έμεινε τίποτα.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Καθαρό · έκδοση 0.1</p>
+  </footer>
+
+  <div class="bulk" id="bulk" hidden>
+    <div class="wrap bulk-inner">
+      <button class="btn btn-primary" id="share-all" type="button" hidden>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        <span>Κοινοποίηση</span>
+      </button>
+      <button class="btn btn-secondary" id="save-all" type="button">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Αποθήκευση<span class="long"> όλων</span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="dropzone-overlay" aria-hidden="true"><p>Άφησε τα αρχεία εδώ</p></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="live" aria-live="polite"></div>
+
+  <noscript><p class="wrap">Το Καθαρό χρειάζεται JavaScript για να δουλέψει.</p></noscript>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

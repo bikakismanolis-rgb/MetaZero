@@ -2,7 +2,7 @@
 
 import { parseTiff } from './exif.js';
 import { parseXmp } from './xmp.js';
-import { ascii, concat, finding, minimalTiff, startsWith, u32le, utf8, writeU32le } from './util.js';
+import { ascii, concat, finding, judgeIcc, minimalTiff, startsWith, u32le, utf8, writeU32le } from './util.js';
 
 const KEEP = new Set(['VP8X', 'VP8 ', 'VP8L', 'ALPH', 'ANIM', 'ANMF', 'ICCP']);
 
@@ -16,6 +16,7 @@ export function cleanWebpBytes(b) {
   const chunks = [];
   const dropped = new Set();
   let orientation = null;
+  let iccRemoved = false;
   const riffEnd = Math.min(8 + u32le(b, 4), b.length);
   let pos = 12;
 
@@ -24,7 +25,11 @@ export function cleanWebpBytes(b) {
     const size = u32le(b, pos + 4);
     const end = Math.min(pos + 8 + size + (size & 1), riffEnd);
     const data = b.subarray(pos + 8, Math.min(pos + 8 + size, riffEnd));
-    if (KEEP.has(type)) {
+    const iccVerdict = type === 'ICCP' ? judgeIcc(data) : null;
+    if (iccVerdict) {
+      findings.push(iccVerdict);
+      iccRemoved = true;
+    } else if (KEEP.has(type)) {
       chunks.push({ type, bytes: b.slice(pos, end) });
     } else if (type === 'EXIF') {
       const t = parseTiff(data, startsWith(data, 0, 'Exif\0\0') ? 6 : 0);
@@ -46,6 +51,7 @@ export function cleanWebpBytes(b) {
   const keepOrientation = vp8x && orientation >= 2 && orientation <= 8;
   if (vp8x) {
     vp8x.bytes[8] &= ~(0x08 | 0x04); // clear EXIF and XMP flags
+    if (iccRemoved) vp8x.bytes[8] &= ~0x20;
     if (keepOrientation) vp8x.bytes[8] |= 0x08;
   }
   if (keepOrientation) {

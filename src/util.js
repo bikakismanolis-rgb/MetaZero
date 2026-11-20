@@ -90,6 +90,41 @@ export function minimalTiff(orientation) {
 
 export const EXIF_HEADER = new Uint8Array([0x45, 0x78, 0x69, 0x66, 0, 0]); // "Exif\0\0"
 
+// Colour profiles are needed to show colours correctly, so standard ones are kept.
+// A custom profile (e.g. from calibrating your own screen) can carry a personal name, so it is removed.
+const STANDARD_ICC = /sRGB|Display P3|DCI.?P3|Image P3|Adobe RGB|Generic (RGB|Gray|CMYK)|ProPhoto|ROMM|Rec\.? ?(601|709|2020|2100)|BT\.? ?(601|709|2020|2100)|ITU-R|Apple RGB|ColorMatch|eciRGB|FOGRA|SWOP|GRACoL|Japan Color|Coated|Uncoated|Dot Gain|Gray Gamma|Linear|ACES|scRGB|Wide Gamut|^c2$|built-in/i;
+
+export function iccDescription(b) {
+  try {
+    if (b.length < 132) return null;
+    const n = u32be(b, 128);
+    for (let i = 0; i < n && 144 + i * 12 <= b.length; i++) {
+      const e = 132 + i * 12;
+      if (ascii(b, e, 4) !== 'desc') continue;
+      const off = u32be(b, e + 4);
+      const type = ascii(b, off, 4);
+      if (type === 'desc') return ascii(b, off + 12, u32be(b, off + 8)).replace(/\0[\s\S]*$/, '').trim() || null;
+      if (type === 'mluc' && u32be(b, off + 8) > 0) {
+        const len = u32be(b, off + 20);
+        const start = off + u32be(b, off + 24);
+        let s = '';
+        for (let j = 0; j + 1 < len; j += 2) s += String.fromCharCode(u16be(b, start + j));
+        return s.replace(/\0[\s\S]*$/, '').trim() || null;
+      }
+    }
+  } catch {
+    // unreadable profile
+  }
+  return null;
+}
+
+/** null if the profile can stay, otherwise a finding explaining why it was removed */
+export function judgeIcc(profile) {
+  const desc = iccDescription(profile);
+  if (!desc || STANDARD_ICC.test(desc)) return null;
+  return finding('Προσωπικό προφίλ χρωμάτων', desc);
+}
+
 export async function inflate(bytes, format = 'deflate') {
   if (typeof DecompressionStream === 'undefined') return null;
   try {

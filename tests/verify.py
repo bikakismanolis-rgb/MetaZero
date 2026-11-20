@@ -17,10 +17,13 @@ from PIL import Image
 
 HERE = Path(__file__).parent
 import os
-FX, OUT = HERE / "fixtures", Path(os.environ.get("VERIFY_DIR", HERE / "out"))
+FX = Path(os.environ.get("FIXTURES_DIR", HERE / "fixtures"))
+OUT = Path(os.environ.get("VERIFY_DIR", HERE / "out"))
 SECRETS = [b"Papadopoulou", b"mpapadopoulou", b"iPhone", b"Pixel 9", b"SM-S928B", b"ACME", b"Athens", b"F2LXK9",
            b"Lightroom", b"neighbour", b"private comment", b"Giorgos", b"LaserJet", b"recorded at home", b"4f9a7c1e2b",
-           b"+37.97", b"37.975", b"23.727", b"Voice memo", b"Samsung Screen", b"ReportLab", b"Secret report"]
+           b"+37.97", b"37.975", b"23.727", b"Voice memo", b"Samsung Screen", b"ReportLab", b"Secret report",
+           b"Maria Monitor", "Maria Monitor".encode("utf-16-be")]
+SECRETS += [s.encode() for s in os.environ.get("EXTRA_SECRETS", "").split("|") if s]
 BAD_GROUPS = ("GPS", "XMP", "IPTC", "Photoshop", "MakerNotes", "Keys", "ItemList", "UserData", "ID3", "IFD1")
 BAD_TAGS = {"Artist", "Author", "Creator", "Make", "Model", "Software", "OwnerName", "SerialNumber", "LensModel",
             "DateTimeOriginal", "Comment", "Title", "LastModifiedBy", "Company", "Producer", "GPSPosition", "Location"}
@@ -125,19 +128,27 @@ for out in sorted(OUT.iterdir()):
     if ext in (".jpg", ".png", ".webp", ".gif"):
         if not pixels_equal(orig, out):
             fail(out.name, "pixels differ from the original")
+        icc_before = exif_dump(orig).get("ICC_Profile:ProfileDescription")
+        icc_after = meta.get("ICC_Profile:ProfileDescription")
+        if icc_before and "Maria" not in str(icc_before) and icc_before != icc_after:
+            fail(out.name, f"standard colour profile lost ({icc_before} → {icc_after})")
         o1 = exif_dump(orig).get("IFD0:Orientation")
         o2 = meta.get("IFD0:Orientation")
         if o1 and o1 != "Horizontal (normal)" and o1 != o2:
             fail(out.name, f"orientation lost ({o1} → {o2})")
     elif ext in (".heic", ".avif"):
         with tempfile.TemporaryDirectory() as d:
-            a, b = Path(d) / "a.png", Path(d) / "b.png"
-            ra = sh("heif-convert", str(orig), str(a), check=False)
-            rb = sh("heif-convert", str(out), str(b), check=False)
-            if rb.returncode != 0 or not b.exists():
+            # heif-convert writes a.png, or a-1.png, a-2.png ... when the file holds several images
+            sh("heif-convert", str(orig), str(Path(d) / "a.png"), check=False)
+            rb = sh("heif-convert", str(out), str(Path(d) / "b.png"), check=False)
+            a_imgs = sorted(p for p in Path(d).glob("a*.png") if p.stat().st_size)
+            b_imgs = sorted(p for p in Path(d).glob("b*.png") if p.stat().st_size)
+            if not a_imgs:
+                print("  · pixel check skipped: the local libheif cannot decode even the original")
+            elif rb.returncode != 0 or not b_imgs:
                 fail(out.name, "cannot be decoded: " + rb.stderr.decode()[-200:])
-            elif not pixels_equal(a, b):
-                fail(out.name, "pixels differ from the original")
+            elif len(a_imgs) != len(b_imgs) or not all(pixels_equal(x, y) for x, y in zip(a_imgs, b_imgs)):
+                fail(out.name, f"pixels differ from the original ({len(a_imgs)} vs {len(b_imgs)} images)")
     elif ext in (".mp4", ".mov", ".m4a", ".mp3"):
         m1, _ = media_md5(orig)
         m2, err = media_md5(out)

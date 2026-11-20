@@ -2,7 +2,7 @@
 
 import { parseTiff } from './exif.js';
 import { parseXmp } from './xmp.js';
-import { ascii, concat, crc32, finding, inflate, minimalTiff, startsWith, u32be, utf8, writeU32be } from './util.js';
+import { ascii, concat, crc32, finding, inflate, judgeIcc, minimalTiff, startsWith, u32be, utf8, writeU32be } from './util.js';
 
 const SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 const KEEP = new Set([
@@ -50,8 +50,16 @@ export async function cleanPngBytes(b) {
       break;
     }
     const data = b.subarray(pos + 8, pos + 8 + len);
+    let iccVerdict = null;
+    if (type === 'iCCP') {
+      const nul = data.indexOf(0);
+      const profile = nul > 0 ? await inflate(data.subarray(nul + 2)) : null;
+      iccVerdict = profile ? judgeIcc(profile) : null;
+    }
 
-    if (KEEP.has(type)) {
+    if (iccVerdict) {
+      findings.push(iccVerdict);
+    } else if (KEEP.has(type)) {
       kept.push(b.subarray(pos, end));
       if (type === 'IHDR') insertAt = kept.length;
     } else if (type === 'tEXt' || type === 'zTXt' || type === 'iTXt') {

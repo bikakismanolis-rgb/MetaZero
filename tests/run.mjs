@@ -10,8 +10,8 @@ globalThis.JSZip = require('jszip');
 const { cleanFile } = await import('../src/clean.js');
 
 const here = dirname(fileURLToPath(import.meta.url));
-const fx = join(here, 'fixtures');
-const out = join(here, 'out');
+const fx = process.env.RUN_DIR || join(here, 'fixtures');
+const out = process.env.RUN_OUT || join(here, 'out');
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 

@@ -4,7 +4,7 @@
 import { parseTiff } from './exif.js';
 import { parseApp13 } from './iptc.js';
 import { parseXmp } from './xmp.js';
-import { EXIF_HEADER, concat, finding, minimalTiff, startsWith, u16be, utf8 } from './util.js';
+import { EXIF_HEADER, concat, finding, judgeIcc, minimalTiff, startsWith, u16be, utf8 } from './util.js';
 
 const XMP_SIG = 'http://ns.adobe.com/xap/1.0/\0';
 const XMP_EXT_SIG = 'http://ns.adobe.com/xmp/extension/\0';
@@ -26,6 +26,7 @@ export function cleanJpegBytes(b, { keepOrientation = true } = {}) {
   let orientation = null;
   let pos = 2;
   let ended = false;
+  const icc = []; // indexes into `out` of the ICC profile chunks
 
   while (pos < b.length) {
     if (b[pos] !== 0xff) {
@@ -104,7 +105,8 @@ export function cleanJpegBytes(b, { keepOrientation = true } = {}) {
       }
     } else if (marker === 0xe2) {
       if (startsWith(b, data, 'ICC_PROFILE\0')) {
-        out.push(seg); // colour profile: needed for correct colours, holds nothing personal
+        icc.push(out.length); // colour profile: needed for correct colours, judged below
+        out.push(seg);
       } else if (startsWith(b, data, 'MPF\0')) {
         findings.push(finding('Επιπλέον κρυφές εικόνες (π.χ. HDR ή βάθος)'));
       } else {
@@ -126,6 +128,15 @@ export function cleanJpegBytes(b, { keepOrientation = true } = {}) {
       out.push(seg);
     }
     pos = segEnd;
+  }
+
+  if (icc.length) {
+    const profile = concat(icc.map((i) => out[i].subarray(18))); // marker(2) len(2) "ICC_PROFILE\0"(12) seq(1) count(1)
+    const verdict = judgeIcc(profile);
+    if (verdict) {
+      findings.push(verdict);
+      for (const i of icc) out[i] = new Uint8Array(0);
+    }
   }
 
   if (ended && pos < b.length) {

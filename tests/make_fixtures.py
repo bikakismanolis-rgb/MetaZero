@@ -55,6 +55,13 @@ with open(p, "ab") as f:
     f.write(b"SAMSUNG_TRAILER " + NAME.encode() + b" 37.97542,23.72738")
 os.remove(FX / "thumb.jpg")
 
+# --- JPEG with a personal colour profile (screen calibrated by its owner)
+custom_icc = bytearray(srgb)
+for enc in ("utf-16-be", "ascii"):
+    custom_icc = custom_icc.replace("sRGB built-in".encode(enc), "Maria Monitor".encode(enc))
+assert b"M\x00a\x00r\x00i\x00a" in custom_icc or b"Maria" in custom_icc
+picture().save(FX / "calibrated.jpg", quality=90, icc_profile=bytes(custom_icc))
+
 # --- PNG: text chunks, XMP, eXIf, time, AI prompt
 p = FX / "Screenshot_2026-11-20-14-32-05.png"
 picture().save(p)
