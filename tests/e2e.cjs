@@ -13,7 +13,9 @@ fs.mkdirSync(OUT, { recursive: true });
 fs.mkdirSync(SHOTS, { recursive: true });
 
 (async () => {
-  const browser = await chromium.launch();
+  const remote = !/^http:\/\/(127\.0\.0\.1|localhost)/.test(BASE);
+  const proxy = remote && process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY } : undefined;
+  const browser = await chromium.launch({ proxy });
   let failures = 0;
   const check = (ok, msg) => {
     console.log(`${ok ? '✓' : '✗'} ${msg}`);
@@ -58,13 +60,14 @@ fs.mkdirSync(SHOTS, { recursive: true });
       await page.evaluate(() => navigator.serviceWorker.ready);
       await page.reload();
       await page.waitForFunction(() => !!navigator.serviceWorker.controller);
-      const status = await page.evaluate(async () => {
+      const webp = fs.readFileSync(path.join(FX, 'photo.webp')).toString('base64');
+      const status = await page.evaluate(async (b64) => {
         const fd = new FormData();
-        const bytes = await (await fetch('tests/fixtures/photo.webp')).blob();
+        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
         fd.append('files', new File([bytes], 'PXL_20261120_150000.webp', { type: 'image/webp' }));
         const r = await fetch('./share-target', { method: 'POST', body: fd, redirect: 'manual' });
         return r.type === 'opaqueredirect' ? 303 : r.status;
-      });
+      }, webp);
       check(status === 303, `share-target POST answered with redirect (${status})`);
       await page.goto(BASE + '?shared=1');
       await page.waitForFunction(() => document.querySelectorAll('.card').length === 1 && !document.querySelector('.badge-busy'), null, { timeout: 15000 });
