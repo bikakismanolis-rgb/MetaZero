@@ -1,0 +1,19 @@
+{
+  "name": "katharo",
+  "version": "1.0.0",
+  "description": "Αφαιρεί τα κρυφά μεταδεδομένα από αρχεία πριν τα μοιραστείς",
+  "scripts": {
+    "fixtures": "python3 tests/make_fixtures.py && node tests/make_pdf_fixture.mjs",
+    "test": "node tests/run.mjs && python3 tests/verify.py",
+    "serve": "python3 -m http.server 8080"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "type": "module",
+  "private": true
+}
